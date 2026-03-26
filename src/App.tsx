@@ -1002,23 +1002,9 @@ export default function App() {
           'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 1240, margin: "0 auto", padding: "32px 24px 48px" }}>
-        <div
-          style={{
-            display: "grid",
-            gap: 32,
-            gridTemplateColumns: "minmax(0, 1.25fr) minmax(320px, 0.95fr)",
-            alignItems: "stretch",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-              minHeight: 0,
-            }}
-          >
+      <div className="page-shell" style={{ maxWidth: 1240, margin: "0 auto", padding: "32px 24px 48px" }}>
+        <div className="hero-grid">
+          <div className="hero-head">
             <div
               style={{
                 display: "inline-block",
@@ -1038,17 +1024,32 @@ export default function App() {
               style={{
                 margin: 0,
                 maxWidth: 760,
-                fontSize: "clamp(3rem, 6vw, 5.5rem)",
+                fontSize: "clamp(2.25rem, 8vw, 5.5rem)",
                 lineHeight: 0.96,
                 fontWeight: 650,
                 letterSpacing: "-0.03em",
               }}
             >
-              Telos-Driven Prioritization
+              Telos-Driven MoSCoW Prioritization
             </h1>
+          </div>
+
+          <div className="hero-statue">
+            <img
+              src="/statue.png"
+              alt="Man carving himself from marble"
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+              }}
+            />
+          </div>
+
+          <div className="hero-rest">
             <p
               style={{
-                marginTop: 18,
+                margin: 0,
                 maxWidth: 760,
                 color: "#d4d4d8",
                 fontSize: 18,
@@ -1136,24 +1137,6 @@ export default function App() {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div
-            style={{
-              minWidth: 0,
-              display: "flex",
-              alignItems: "flex-start",
-            }}
-          >
-            <img
-              src="/statue.png"
-              alt="Man carving himself from marble"
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-              }}
-            />
           </div>
         </div>
 
@@ -1463,9 +1446,47 @@ export default function App() {
             opacity: 0.001;
           }
         }
+        .hero-grid {
+          display: grid;
+          gap: 32px;
+          grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.95fr);
+          grid-template-rows: auto 1fr;
+          grid-template-areas:
+            "head statue"
+            "rest statue";
+          align-items: start;
+        }
+        .hero-head {
+          grid-area: head;
+        }
+        .hero-statue {
+          grid-area: statue;
+          min-width: 0;
+        }
+        .hero-rest {
+          grid-area: rest;
+          display: flex;
+          flex-direction: column;
+          min-height: 0;
+        }
         @media (max-width: 960px) {
+          .page-shell {
+            padding: 24px 16px 40px !important;
+          }
           .hero-grid {
             grid-template-columns: 1fr;
+            grid-template-rows: none;
+            grid-template-areas:
+              "head"
+              "statue"
+              "rest";
+            gap: 24px;
+          }
+          .hero-statue img {
+            max-height: min(380px, 50vh);
+            width: 100%;
+            object-fit: contain;
+            object-position: center top;
           }
         }
       `}</style>
