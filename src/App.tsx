@@ -1012,7 +1012,7 @@ export default function App() {
                 padding: "8px 12px",
                 borderRadius: 999,
                 border: "1px solid rgba(255,255,255,0.09)",
-                background: "rgba(255,255,255,0.05)",
+                background: "rgba(20, 14, 14, 0.05)",
                 color: "#e4e4e7",
                 fontSize: 12,
                 letterSpacing: "0.03em",
@@ -1036,7 +1036,7 @@ export default function App() {
 
           <div className="hero-statue">
             <img
-              src="/statue.png"
+              src={`${import.meta.env.BASE_URL}statue.png`}
               alt="Man carving himself from marble"
               style={{
                 width: "100%",
