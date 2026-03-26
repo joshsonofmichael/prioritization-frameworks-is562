@@ -1018,7 +1018,7 @@ export default function App() {
                 letterSpacing: "0.03em",
               }}
             >
-              IS 562 - Life Role Prioritization
+              IS 562 - Prioritization Frameworks - Josh Michaelson
             </div>
             <h1
               style={{
