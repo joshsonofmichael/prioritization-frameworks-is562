@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type TaskItem = {
   label: string;
@@ -15,7 +15,9 @@ type RoleKey =
   | "family"
   | "citizen"
   | "polymath"
-  | "builder";
+  | "artist"
+  | "builder"
+  | "consumer";
 
 type ColumnKey = "must" | "should" | "could" | "wont";
 
@@ -50,7 +52,9 @@ const icons: Record<RoleKey | "quote", string> = {
   family: "F",
   citizen: "C",
   polymath: "Pm",
+  artist: "Ar",
   builder: "B",
+  consumer: "Co",
   quote: '"',
 };
 
@@ -145,7 +149,7 @@ const roleData: Record<RoleKey, RoleData> = {
           why: "Late-night drift is one of the main sources of derailment.",
         },
         {
-          label: "Reduce PMO / avoid trigger loops",
+          label: "Reduce emotional buffering / avoid trigger loops",
           why: "This directly affects energy, self-trust, and focus.",
         },
         {
@@ -155,7 +159,7 @@ const roleData: Record<RoleKey, RoleData> = {
       ],
       should: [
         {
-          label: "Phone boundaries",
+          label: "Screen time boundaries",
           why: "Reducing frictionless scrolling makes better choices easier.",
         },
         {
@@ -229,46 +233,51 @@ const roleData: Record<RoleKey, RoleData> = {
   },
   employee: {
     id: "employee",
-    name: "Employee",
-    column: "must",
+    name: "Worker",
+    column: "should",
     icon: icons.employee,
     accent: "linear-gradient(135deg, rgba(245,158,11,0.16), rgba(249,115,22,0.06))",
     border: "rgba(251,191,36,0.28)",
     chipBg: "rgba(245,158,11,0.18)",
-    summary: "Do solid work, maintain trust, and keep stable income and momentum.",
+    summary:
+      "Put in my hours, deliver assigned work, and stay trustworthy—while the job is slow enough to flex mental energy and time toward school when needed.",
     why:
-      "Even if work is philosophically optional in the abstract, it is a concrete commitment with real weekly consequences right now.",
+      "The job is a real commitment (~30 hours), but this sprint treats school as the heavier Must. Workload has been light enough lately to protect school with time off and lighter cognitive load when that is honest and sustainable.",
     tasks: {
       must: [
         {
-          label: "Show up on time",
-          why: "Reliability is a baseline professional expectation and affects trust.",
+          label: "Be present for scheduled hours (~30 hrs / week)",
+          why: "Core expectation; keeps income, trust, and continuity intact.",
         },
         {
-          label: "Complete assigned work well",
-          why: "This is the core reason the role exists.",
+          label: "Complete assigned work well and on time",
+          why: "This is what the role is paying for; slipping here is the main professional risk.",
         },
       ],
       should: [
         {
-          label: "Communicate clearly",
-          why: "Important for smooth collaboration and reputation, but usually not the main bottleneck.",
+          label: "Communicate clearly about capacity and deadlines",
+          why: "Especially when shifting energy toward school or taking time that affects the team.",
         },
         {
-          label: "Look for small ways to improve",
-          why: "Valuable, but secondary to simply doing core work well this semester.",
+          label: "Look for small ways to improve when bandwidth allows",
+          why: "Nice to have; secondary to core delivery this semester.",
         },
       ],
       could: [
         {
+          label: "Use slow weeks for school—time off or lighter focus when workload truly allows",
+          why: "Matches recent reality; only when it does not hide problems or break commitments.",
+        },
+        {
           label: "Extra initiative beyond current scope",
-          why: "Good when capacity exists, but not required every week.",
+          why: "Good when capacity exists, not required every week.",
         },
       ],
       wont: [
         {
-          label: "Over-identifying with work at the cost of other primary roles",
-          why: "Work matters, but it is not the whole hierarchy of life.",
+          label: "Over-identifying with work at the cost of graduation and other primary roles",
+          why: "Work matters, but this season the degree is the sharper constraint.",
         },
       ],
     },
@@ -276,7 +285,7 @@ const roleData: Record<RoleKey, RoleData> = {
   disciple: {
     id: "disciple",
     name: "Disciple of Christ",
-    column: "should",
+    column: "must",
     icon: icons.disciple,
     accent: "linear-gradient(135deg, rgba(234,179,8,0.16), rgba(253,224,71,0.06))",
     border: "rgba(250,204,21,0.28)",
@@ -284,7 +293,7 @@ const roleData: Record<RoleKey, RoleData> = {
     summary:
       "Live the gospel and maintain my relationship with God so I can have the Spirit and become more like Christ.",
     why:
-      "This is central to identity, but it should be pursued faithfully rather than perfectionistically and in a way that fits this season.",
+      "A Must in this sprint not because every hour competes on the calendar, but because discipleship is the anchor that permeates school, work, and relationships. Time may flex; the orientation does not. Pursue it faithfully rather than perfectionistically.",
     tasks: {
       must: [
         {
@@ -299,6 +308,10 @@ const roleData: Record<RoleKey, RoleData> = {
           label: "Daily scripture touchpoint",
           why: "Even one verse keeps scripture study alive when time is tight and is better than skipping it entirely.",
         },
+        {
+          label: "Temple once a month",
+          why: "This is a realistic recurring spiritual anchor for your current season.",
+        },
       ],
       should: [
         {
@@ -310,30 +323,24 @@ const roleData: Record<RoleKey, RoleData> = {
           why: "This gives structure to weekly study and helps align scripture engagement with the Church rhythm.",
         },
         {
-          label: "Temple once a month",
-          why: "This is a realistic recurring spiritual anchor for your current season.",
-        },
-        {
           label: "Move records and get a calling",
           why: "This would strengthen belonging and accountability, but it is not as urgent as core daily and weekly practices.",
         },
-      ],
-      could: [
         {
           label: "Temple once a week",
           why: "A strong ideal, but more than what is realistically required right now.",
         },
+      ],
+      
+      could: [
+        
         {
           label: "BYU devotional each week",
           why: "Spiritually helpful, but not necessary for a successful week.",
         },
         {
-          label: "Additional theological reading",
+          label: "Additional theological reading/listening",
           why: "Potentially rich, but not the core practice right now.",
-        },
-        {
-          label: "Listen to a religious podcast",
-          why: "Helpful enrichment, but more optional than prayer, scripture, and worship.",
         },
       ],
       wont: [
@@ -543,18 +550,18 @@ const roleData: Record<RoleKey, RoleData> = {
       ],
     },
   },
-  builder: {
-    id: "builder",
-    name: "Builder",
+  artist: {
+    id: "artist",
+    name: "Artist",
     column: "wont",
-    icon: icons.builder,
-    accent: "linear-gradient(135deg, rgba(168,85,247,0.16), rgba(99,102,241,0.06))",
-    border: "rgba(196,181,253,0.28)",
-    chipBg: "rgba(168,85,247,0.18)",
+    icon: icons.artist,
+    accent: "linear-gradient(135deg, rgba(244,114,182,0.16), rgba(168,85,247,0.06))",
+    border: "rgba(244,114,182,0.32)",
+    chipBg: "rgba(244,114,182,0.18)",
     summary:
-      "Build things that create value or beauty for others, whether in software, music, writing, or other creative work.",
+      "Express and refine creativity—music, writing, performance, and other artistic work—as its own lane.",
     why:
-      "This is meaningful, but it is the clearest role to intentionally park until after graduation.",
+      "This identity matters long-term, but the semester sprint needs this channel quiet except for small restorative outlets.",
     tasks: {
       must: [
         {
@@ -564,8 +571,8 @@ const roleData: Record<RoleKey, RoleData> = {
       ],
       should: [
         {
-          label: "Capture ideas when they arise",
-          why: "Keeps the role alive without reactivating it.",
+          label: "Capture creative ideas when they arise",
+          why: "Keeps songwriting, writing, and other art alive without reactivating big commitments.",
         },
       ],
       could: [
@@ -573,11 +580,103 @@ const roleData: Record<RoleKey, RoleData> = {
           label: "Very small optional creative moments",
           why: "Allowed if restorative, but not as another major project stream.",
         },
+        {
+          label: "Play my guitar",
+          why: "For short moments of relaxation and enjoyment.",
+        },
+      ],
+      wont: [
+        {
+          label: "Re-record and reproduce songs",
+          why: "This is a long-term goal, not a current obligation.",
+        },
+        {
+          label: "Start a Substack/Blog",
+          why: "This is a long-term goal, not a current obligation.",
+        },
+      ],
+    },
+  },
+  builder: {
+    id: "builder",
+    name: "Builder",
+    column: "wont",
+    icon: icons.builder,
+    accent: "linear-gradient(135deg, rgba(168,85,247,0.16), rgba(99,102,241,0.06))",
+    border: "rgba(196,181,253,0.28)",
+    chipBg: "rgba(168,85,247,0.18)",
+    summary:
+      "Ship systems, software, tooling, and structured projects—STEM and systemic work that creates leverage.",
+    why:
+      "Meaningful, but the clearest lane to park until after graduation alongside other deferred builds.",
+    tasks: {
+      must: [
+        {
+          label: "None for this season",
+          why: "This role is intentionally paused, not abandoned.",
+        },
+      ],
+      should: [
+        {
+          label: "Capture technical or product ideas when they arise",
+          why: "Keeps the builder mindset alive without opening new execution threads.",
+        },
+      ],
+      could: [
+        {
+          label: "Tiny optional fixes or spikes",
+          why: "Only if restorative and minutes, not a new project stream.",
+        },
       ],
       wont: [
         {
           label: "Launching major side projects before graduation",
           why: "This is the most obvious overload multiplier.",
+        },
+        {
+          label: "Deploy farm website",
+          why: "This will take significant time and effort, and there isn't any deadline pressure.",
+        },
+      ],
+    },
+  },
+  consumer: {
+    id: "consumer",
+    name: "Consumer",
+    column: "wont",
+    icon: icons.consumer,
+    accent: "linear-gradient(135deg, rgba(245,158,11,0.14), rgba(120,113,108,0.07))",
+    border: "rgba(245,158,11,0.30)",
+    chipBg: "rgba(245,158,11,0.16)",
+    summary:
+      "Spend money and attention on media, goods, and leisure in a bounded way—enough for real life, not as the main event.",
+    why:
+      "Consumption is unavoidable, but this sprint treats it as a small, guarded lane so it does not crowd out formation, relationships, or graduation work.",
+    tasks: {
+      must: [],
+      should: [],
+      could: [
+        {
+          label: "Shared entertainment with people I care about",
+          why: "Movies, games, or shows are fine when the point is time together, not chasing content for its own sake.",
+        },
+        {
+          label: "Buy enough for real needs and other goals",
+          why: "Food, gear, and services that support health, school, and relationships—without treating shopping as a hobby or identity.",
+        },
+      ],
+      wont: [
+        {
+          label: "Treat buying or scrolling as main decompression",
+          why: "Default stress relief should not be solo consumption or endless feeds.",
+        },
+        {
+          label: "Impulse upgrades, extra subscriptions, or retail as mood repair",
+          why: "Small leaks add up and compete with tuition, time, and sleep.",
+        },
+        {
+          label: "Keeping up with releases, hype, or lifestyle benchmarks",
+          why: "Comparison-driven spending is a moving target that never satisfies.",
         },
       ],
     },
@@ -615,20 +714,74 @@ const sections: SectionDef[] = [
   },
 ];
 
+/** Life-arc framing: which MoSCoW column each role sits in (semester task data unchanged). */
+const lifeArcColumnByRole: Record<RoleKey, ColumnKey> = {
+  mortal: "must",
+  human: "must",
+  disciple: "must",
+  family: "must",
+  partner: "must",
+  student: "should",
+  employee: "should",
+  citizen: "should",
+  polymath: "could",
+  artist: "could",
+  builder: "could",
+  consumer: "wont",
+};
+
+const LIFE_ARC_ROLE_ORDER: RoleKey[] = [
+  "mortal",
+  "human",
+  "disciple",
+  "family",
+  "partner",
+  "student",
+  "employee",
+  "citizen",
+  "polymath",
+  "artist",
+  "builder",
+  "consumer",
+];
+
+const lifeArcOrderIndex: Record<RoleKey, number> = Object.fromEntries(
+  LIFE_ARC_ROLE_ORDER.map((k, i) => [k, i]),
+) as Record<RoleKey, number>;
+
+function sortRolesForScope(roles: RoleData[], scope: "semester" | "life"): RoleData[] {
+  if (scope === "semester") {
+    return roles;
+  }
+  return [...roles].sort(
+    (a, b) => (lifeArcOrderIndex[a.id] ?? 99) - (lifeArcOrderIndex[b.id] ?? 99),
+  );
+}
+
 const quoteOptions = [
   {
-    text: "The good life is not built by doing everything, but by ordering what matters according to who I am trying to become.",
-    source: "Project framing",
-  },
-  {
-    text: "Happiness depends upon ourselves.",
+    text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
     source: "Aristotle",
   },
   {
-    text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
-    source: "Commonly attributed to Aristotle",
+    text: "It is the mark of an educated mind to be able to entertain a thought without accepting it.",
+    source: "Aristotle",
+  },
+  {
+    text: "The good for man is an activity of the soul in accordance with virtue.",
+    source: "Aristotle",
+  },
+  {
+    text: "We should begin by recognizing the reality that just because something is good is not a sufficient reason for doing it… Some things are better, and others are best.",
+    source: "Dallin H. Oaks",
+  },
+  {
+    text: "Decide what you will be and then do what you must do.",
+    source: "Spencer W. Kimball",
   },
 ];
+
+const QUOTE_ROTATE_MS = 5000;
 
 const baseCard: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.09)",
@@ -765,15 +918,78 @@ function ResponsiveGrid({
 export default function App() {
   const [selectedRoleId, setSelectedRoleId] = useState<RoleKey>("mortal");
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [displayQuoteIndex, setDisplayQuoteIndex] = useState(0);
+  const [quoteExiting, setQuoteExiting] = useState(false);
+  const [quoteAnimReady, setQuoteAnimReady] = useState(false);
+  const quoteExitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const quoteRotationSeenRef = useRef(false);
+
+  const [scopeView, setScopeView] = useState<"semester" | "life">("semester");
+
+  useEffect(() => {
+    setQuoteAnimReady(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const scheduleNext = () => {
+      timeoutId = setTimeout(() => {
+        if (cancelled) return;
+        setQuoteIndex((i) => (i + 1) % quoteOptions.length);
+        scheduleNext();
+      }, QUOTE_ROTATE_MS);
+    };
+    scheduleNext();
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (quoteIndex === displayQuoteIndex) return;
+    if (quoteExitTimerRef.current) {
+      clearTimeout(quoteExitTimerRef.current);
+      quoteExitTimerRef.current = null;
+    }
+    setQuoteExiting(true);
+    quoteExitTimerRef.current = setTimeout(() => {
+      setDisplayQuoteIndex(quoteIndex);
+      setQuoteExiting(false);
+      quoteRotationSeenRef.current = true;
+      quoteExitTimerRef.current = null;
+    }, 320);
+    return () => {
+      if (quoteExitTimerRef.current) {
+        clearTimeout(quoteExitTimerRef.current);
+        quoteExitTimerRef.current = null;
+      }
+    };
+  }, [quoteIndex, displayQuoteIndex]);
 
   const selectedRole = roleData[selectedRoleId] ?? roleData.mortal;
 
   const groupedRoles = useMemo(() => {
-    return sections.map((section) => ({
-      ...section,
-      roles: Object.values(roleData).filter((role) => role.column === section.key),
-    }));
-  }, []);
+    return sections.map((section) => {
+      const roles = Object.values(roleData).filter((role) =>
+        scopeView === "semester"
+          ? role.column === section.key
+          : lifeArcColumnByRole[role.id] === section.key,
+      );
+      const subtitle =
+        section.key === "must"
+          ? scopeView === "semester"
+            ? "Mandatory for a stable, successful semester"
+            : "Mandatory for a stable, successful life"
+          : section.subtitle;
+      return {
+        ...section,
+        subtitle,
+        roles: sortRolesForScope(roles, scopeView),
+      };
+    });
+  }, [scopeView]);
 
   return (
     <div
@@ -792,10 +1008,17 @@ export default function App() {
             display: "grid",
             gap: 32,
             gridTemplateColumns: "minmax(0, 1.25fr) minmax(320px, 0.95fr)",
-            alignItems: "center",
+            alignItems: "stretch",
           }}
         >
-          <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+              minHeight: 0,
+            }}
+          >
             <div
               style={{
                 display: "inline-block",
@@ -835,48 +1058,80 @@ export default function App() {
               A role-based MoSCoW framework for ordering responsibilities according to the kind of life I am trying to build.
             </p>
 
-            <div style={{ ...baseCard, marginTop: 24, borderRadius: 24, padding: 18 }}>
+            <div
+              style={{
+                ...baseCard,
+                marginTop: 22,
+                borderRadius: 22,
+                padding: 20,
+                maxWidth: 760,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  lineHeight: 1.75,
+                  color: "#c4c4cc",
+                }}
+              >
+                The good life is ordered, not exhaustive. This is a MoSCoW snapshot for the sprint to graduation: roles in the grid below, and another MoSCoW inside each role when you open it. It frames this season, not my whole life. Toggle{" "}
+                <strong style={{ color: "#e4e4e7", fontWeight: 600 }}>Semester sprint</strong>
+                {" "}
+                and{" "}
+                <strong style={{ color: "#e4e4e7", fontWeight: 600 }}>Life arc</strong>
+                {" "}
+                above the grid to compare this term against the longer arc.
+              </p>
+            </div>
+
+            <div
+              style={{ ...baseCard, marginTop: 20, borderRadius: 24, padding: 18 }}
+              aria-live="polite"
+              aria-atomic="true"
+            >
               <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                <div style={{ fontSize: 20, color: "#a1a1aa", lineHeight: 1 }}>{icons.quote}</div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: "#e4e4e7" }}>
-                    {quoteOptions[quoteIndex].text}
-                  </p>
+                <div style={{ fontSize: 20, color: "#a1a1aa", lineHeight: 1 }} aria-hidden="true">
+                  {icons.quote}
+                </div>
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    overflow: "hidden",
+                  }}
+                >
                   <div
-                    style={{
-                      display: "flex",
-                      gap: 12,
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 10,
-                      flexWrap: "wrap",
-                    }}
+                    key={displayQuoteIndex}
+                    className={
+                      quoteAnimReady && quoteExiting
+                        ? "quote-rotator-panel quote-rotator-exit"
+                        : quoteAnimReady && !quoteExiting && quoteRotationSeenRef.current
+                          ? "quote-rotator-panel quote-rotator-enter"
+                          : "quote-rotator-panel"
+                    }
                   >
-                    <span
+                    <p
                       style={{
-                        fontSize: 11,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.18em",
+                        margin: 0,
+                        fontSize: 15,
+                        lineHeight: 1.75,
+                        color: "#e4e4e7",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      “{quoteOptions[displayQuoteIndex].text}”
+                    </p>
+                    <div
+                      style={{
+                        marginTop: 12,
+                        fontSize: 12,
+                        letterSpacing: "0.06em",
                         color: "#71717a",
                       }}
                     >
-                      {quoteOptions[quoteIndex].source}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setQuoteIndex((quoteIndex + 1) % quoteOptions.length)}
-                      style={{
-                        borderRadius: 14,
-                        border: "1px solid rgba(255,255,255,0.10)",
-                        background: "transparent",
-                        color: "#e4e4e7",
-                        padding: "10px 12px",
-                        cursor: "pointer",
-                        fontSize: 13,
-                      }}
-                    >
-                      Rotate quote
-                    </button>
+                      — {quoteOptions[displayQuoteIndex].source}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -885,36 +1140,18 @@ export default function App() {
 
           <div
             style={{
-              ...baseCard,
-              overflow: "hidden",
-              borderRadius: 32,
-              background: "linear-gradient(135deg, #111827, #09090b)",
-              minHeight: 420,
-              position: "relative",
-              display: "grid",
-              placeItems: "center",
-              padding: 24,
+              minWidth: 0,
+              display: "flex",
+              alignItems: "flex-start",
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0.2) 100%)",
-                pointerEvents: "none",
-              }}
-            />
             <img
               src="/statue.png"
               alt="Man carving himself from marble"
               style={{
                 width: "100%",
-                height: "100%",
-                maxHeight: 520,
-                objectFit: "cover",
-                borderRadius: 22,
-                background: "rgba(255,255,255,0.03)",
+                height: "auto",
+                display: "block",
               }}
             />
           </div>
@@ -926,12 +1163,12 @@ export default function App() {
               display: "flex",
               gap: 16,
               justifyContent: "space-between",
-              alignItems: "flex-end",
+              alignItems: "flex-start",
               flexWrap: "wrap",
               marginBottom: 20,
             }}
           >
-            <div>
+            <div style={{ minWidth: 0 }}>
               <h2 style={{ margin: 0, fontSize: 34, fontWeight: 620 }}>Role Hierarchy</h2>
               <p
                 style={{
@@ -942,20 +1179,59 @@ export default function App() {
                   lineHeight: 1.7,
                 }}
               >
-                Top-level MoSCoW sorting for this season of life. Click any role to inspect its own task-level breakdown below. Hover any task chip for its rationale.
+                Select a role to continue
               </p>
             </div>
             <div
               style={{
-                borderRadius: 999,
-                border: "1px solid rgba(255,255,255,0.09)",
-                background: "rgba(255,255,255,0.05)",
-                color: "#d4d4d8",
-                fontSize: 12,
-                padding: "10px 14px",
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                alignItems: "center",
               }}
             >
-              Select a role to continue
+              <button
+                type="button"
+                onClick={() => setScopeView("semester")}
+                style={{
+                  borderRadius: 999,
+                  border:
+                    scopeView === "semester"
+                      ? "1px solid rgba(255,255,255,0.22)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                  background:
+                    scopeView === "semester"
+                      ? "rgba(255,255,255,0.10)"
+                      : "rgba(255,255,255,0.03)",
+                  color: "#e4e4e7",
+                  fontSize: 12,
+                  padding: "8px 14px",
+                  cursor: "pointer",
+                }}
+              >
+                Semester sprint (to graduation)
+              </button>
+              <button
+                type="button"
+                onClick={() => setScopeView("life")}
+                style={{
+                  borderRadius: 999,
+                  border:
+                    scopeView === "life"
+                      ? "1px solid rgba(255,255,255,0.22)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                  background:
+                    scopeView === "life"
+                      ? "rgba(255,255,255,0.10)"
+                      : "rgba(255,255,255,0.03)",
+                  color: "#e4e4e7",
+                  fontSize: 12,
+                  padding: "8px 14px",
+                  cursor: "pointer",
+                }}
+              >
+                Life arc
+              </button>
             </div>
           </div>
 
@@ -987,14 +1263,25 @@ export default function App() {
                   </div>
                 </div>
                 <div style={{ display: "grid", gap: 12 }}>
-                  {section.roles.map((role) => (
-                    <Pill
-                      key={role.id}
-                      role={role}
-                      active={selectedRoleId === role.id}
-                      onClick={() => setSelectedRoleId(role.id)}
-                    />
-                  ))}
+                  {section.roles.length === 0 ? (
+                    <div style={{ color: "#71717a", fontSize: 13, lineHeight: 1.6 }}>
+                      <div>None for now.</div>
+                      {scopeView === "life" && section.key === "wont" && (
+                        <div style={{ marginTop: 8, fontSize: 12, color: "#52525b" }}>
+                          Later: life-arc “won’t” might name explicitly deferred identities, habits, or seasons.
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    section.roles.map((role) => (
+                      <Pill
+                        key={role.id}
+                        role={role}
+                        active={selectedRoleId === role.id}
+                        onClick={() => setSelectedRoleId(role.id)}
+                      />
+                    ))
+                  )}
                 </div>
               </div>
             ))}
@@ -1081,6 +1368,22 @@ export default function App() {
             </div>
 
             <div style={{ marginTop: 24 }}>
+              {scopeView === "life" && (
+                <div
+                  style={{
+                    marginBottom: 20,
+                    borderRadius: 16,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    background: "rgba(0,0,0,0.22)",
+                    padding: "14px 16px",
+                    color: "#d4d4d8",
+                    fontSize: 13,
+                    lineHeight: 1.65,
+                  }}
+                >
+                  <strong style={{ color: "#e4e4e7" }}>Semester task ordering.</strong> The Must / Should / Could / Won’t lists below are still sorted for finishing this semester’s sprint—not re-ranked for life-arc role priority. Use <strong>Life arc</strong> above for which roles sit in which column; use <strong>Semester sprint</strong> for task-level ordering through graduation.
+                </div>
+              )}
               <ResponsiveGrid minWidth={220}>
                 <SectionCard
                   title="Must"
@@ -1122,6 +1425,44 @@ export default function App() {
       </div>
 
       <style>{`
+        .quote-rotator-panel {
+          will-change: transform, opacity;
+        }
+        .quote-rotator-enter {
+          animation: quoteRotatorIn 0.4s ease-out both;
+        }
+        .quote-rotator-exit {
+          animation: quoteRotatorOut 0.3s ease-in forwards;
+        }
+        @keyframes quoteRotatorIn {
+          from {
+            opacity: 0;
+            transform: translateX(1.25rem);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes quoteRotatorOut {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(-1.1rem);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .quote-rotator-enter,
+          .quote-rotator-exit {
+            animation: none !important;
+          }
+          .quote-rotator-exit {
+            opacity: 0.001;
+          }
+        }
         @media (max-width: 960px) {
           .hero-grid {
             grid-template-columns: 1fr;
